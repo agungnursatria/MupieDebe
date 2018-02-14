@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.anb.mupiedebe.adapter.ReviewAdapter;
 import com.anb.mupiedebe.adapter.VideoAdapter;
 import com.anb.mupiedebe.controller.RestManager;
-import com.anb.mupiedebe.database.FavoriteContract;
 import com.anb.mupiedebe.models.BaseReview;
 import com.anb.mupiedebe.models.BaseVideo;
 import com.anb.mupiedebe.models.Movie;
@@ -62,8 +61,6 @@ public class DetailActivity extends AppCompatActivity implements VideoAdapter.Cl
     RecyclerView rvVideo;
     @BindView(R.id.rvReview)
     RecyclerView rvReview;
-    @BindView(R.id.btnFavorite)
-    Button btnFavorite;
     private RestManager mManager;
     private Movie selectedMovie;
     private VideoAdapter videoAdapter;
@@ -99,69 +96,6 @@ public class DetailActivity extends AppCompatActivity implements VideoAdapter.Cl
         rvReview.setAdapter(reviewAdapter);
 
 
-    }
-
-    private Uri uriBuilder(long id) {
-        return ContentUris.withAppendedId(FavoriteContract.FavoriteEntry.CONTENT_URI, id);
-    }
-
-    private void fetchFavorite() {
-        Cursor data = favoriteDetail();
-
-
-        data.moveToFirst();
-        Integer movieId = data.getInt(data.getColumnIndex(FavoriteContract.FavoriteEntry.COLUMN_MOVIE_ID));
-        String title = data.getString(data.getColumnIndex(FavoriteContract.FavoriteEntry.COLUMN_TITLE));
-        Double rating = data.getDouble(data.getColumnIndex(FavoriteContract.FavoriteEntry.COLUMN_RATING));
-        String release = data.getString(data.getColumnIndex(FavoriteContract.FavoriteEntry.COLUMN_RELEASE));
-        String overview = data.getString(data.getColumnIndex(FavoriteContract.FavoriteEntry.COLUMN_OVERVIEW));
-        String poster = data.getString(data.getColumnIndex(FavoriteContract.FavoriteEntry.COLUMN_POSTER));
-
-        selectedMovie = new Movie();
-        selectedMovie.setId(movieId);
-        selectedMovie.setTitle(title);
-        selectedMovie.setVoteAverage(rating);
-        selectedMovie.setReleaseDate(release);
-        selectedMovie.setOverview(overview);
-        selectedMovie.setPosterPath(poster);
-
-        hideShare();
-
-    }
-
-    private Cursor favoriteDetail() {
-        String movieId = curIntent.getStringExtra(Intent.EXTRA_TEXT);
-        Cursor favoriteDetail = getContentResolver().query(
-                FavoriteContract.FavoriteEntry.CONTENT_URI,
-                new String[]{
-                        FavoriteContract.FavoriteEntry.COLUMN_MOVIE_ID,
-                        FavoriteContract.FavoriteEntry.COLUMN_TITLE,
-                        FavoriteContract.FavoriteEntry.COLUMN_RATING,
-                        FavoriteContract.FavoriteEntry.COLUMN_RELEASE,
-                        FavoriteContract.FavoriteEntry.COLUMN_OVERVIEW,
-                        FavoriteContract.FavoriteEntry.COLUMN_POSTER
-                },
-                FavoriteContract.FavoriteEntry.COLUMN_MOVIE_ID + " = " + movieId,
-                null,
-                null);
-
-        return favoriteDetail;
-    }
-
-    private boolean isFavorite() {
-        Cursor favoriteCursor = getContentResolver().query(
-                FavoriteContract.FavoriteEntry.CONTENT_URI,
-                null,
-                FavoriteContract.FavoriteEntry.COLUMN_MOVIE_ID + " = " + selectedMovie.getId(),
-                null,
-                null);
-
-        if (favoriteCursor != null && favoriteCursor.moveToFirst()) {
-            favoriteCursor.close();
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private void fetchMovie(final String movieId) {
@@ -209,7 +143,6 @@ public class DetailActivity extends AppCompatActivity implements VideoAdapter.Cl
             llMain.setVisibility(View.VISIBLE);
             llProgressBar.setVisibility(View.INVISIBLE);
             Toast.makeText(getApplicationContext(), "Please check your internet connection.", Toast.LENGTH_LONG).show();
-            fetchFavorite();
             setMovieDetail();
 
         }

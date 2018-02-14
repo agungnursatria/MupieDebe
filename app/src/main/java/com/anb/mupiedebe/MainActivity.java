@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.anb.mupiedebe.adapter.MovieAdapter;
 import com.anb.mupiedebe.controller.RestManager;
-import com.anb.mupiedebe.database.FavoriteContract;
 import com.anb.mupiedebe.models.Base;
 import com.anb.mupiedebe.models.Result;
 import com.anb.mupiedebe.utils.Constant;
@@ -132,14 +131,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Clic
     }
 
     private void fetchMovie(String sortBy) {
-        if (sortBy.equals("favorite")) {
-            loadFavorite();
-            rv.setLayoutManager(gridLayoutManager);
-        } else {
-            loadMovie(sortBy);
-            rv.setLayoutManager(gridLayoutManager);
-        }
-
+        loadMovie(sortBy);
+        rv.setLayoutManager(gridLayoutManager);
     }
 
     private void loadMovie(String sortBy) {
@@ -208,46 +201,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Clic
 
     }
 
-
-    private Cursor getFavorite() {
-        Cursor favoriteCursor = getContentResolver().query(
-                FavoriteContract.FavoriteEntry.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
-
-        return favoriteCursor;
-    }
-
-    private void loadFavorite() {
-
-        rv.setVisibility(View.INVISIBLE);
-        llProgressBar.setVisibility(View.VISIBLE);
-
-        mAdapter.clearItem();
-        movies.clear();
-        Cursor favData = getFavorite();
-
-        while (favData.moveToNext()) {
-            Integer movieId = favData.getInt(favData.getColumnIndex(FavoriteContract.FavoriteEntry._ID));
-            String posterPath = favData.getString(favData.getColumnIndex(FavoriteContract.FavoriteEntry.COLUMN_POSTER));
-
-            Result movie = new Result();
-            movie.setId(movieId);
-            movie.setPosterPath(posterPath);
-
-            mAdapter.addItem(movie);
-            movies.add(movie);
-        }
-
-        mAdapter.notifyDataSetChanged();
-
-        rv.setVisibility(View.VISIBLE);
-        llProgressBar.setVisibility(View.GONE);
-
-    }
-
     public boolean getNetworkAvailability() {
         return Utils.isNetworkAvailable(getApplicationContext());
     }
@@ -274,9 +227,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Clic
             fetchMovie(sortBy);
         } else if (id == R.id.action_rate) {
             sortBy = "rate";
-            fetchMovie(sortBy);
-        } else if (id == R.id.action_favorite) {
-            sortBy = "favorite";
             fetchMovie(sortBy);
         }
         return super.onOptionsItemSelected(item);
